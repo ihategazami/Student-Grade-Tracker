@@ -17,7 +17,7 @@ def enrol_student():
             print("You may not include any integer in the first name.")
         else:
             break
-    # Get Last Name from the user
+    # Get Last Name from the user 
     while True:
         print("\nPlease enter the LAST NAME of the student:")
         last_name = input("> ").strip().title()
@@ -103,6 +103,194 @@ def show_all_students():
     else:
         print("No students found. Please enrol student first.")
 
+def record_grade():
+    # Get the student ID from the user
+    while True:
+        print("\nPlease enter the ID of the student that you want to enter the grade. You see the the list of all students on the menu by choosing 2")
+        student_id = input("> ").strip()
+        try:
+            student_id = int(student_id)
+            break
+        except:
+            print("Student ID must be an integer.")
+    cursor.execute("SELECT first_name, last_name FROM student WHERE student_id = ?", (student_id,))
+    student = cursor.fetchone()
+    if not student:
+        print("Student not found.")
+        return
+    # Check if the user matches the person they are looking for.
+    while True:
+        print(f"\nAre you looking for {student[0]} {student[1]}?")
+        answer = input("Yes or No > ").strip().lower()
+        if answer == "yes":
+            break
+        elif answer == "no":
+            print("Please try again from the beginning")
+            print("You can see the list of all students from choosing 2 on the menu.")
+            return
+        else:
+            print("Please enter Yes or No")
+            continue
+    # Get the standard number from the user
+    while True:
+        print("\nPlease enter the number of the standard")
+        standard_number = input("> ").strip()
+        try:
+            standard_number = int(standard_number)
+            # Look for the NZQA standard in the database
+            cursor.execute("SELECT standard_type, level, domain, title, credits, assessment_type FROM standard WHERE standard_number = ?", (standard_number,))
+            standard = cursor.fetchone()
+            if not standard:
+                print("Standard not found.")
+                continue
+            st_type, level, domain, title, credits, assess_type = standard
+            # Check if the user matches the standard they are looking for
+            print(f"\nDo you mean {st_type} Standard - Level {level} {domain} - {title} - {credits} {assess_type} Credit(s)?")
+            answer = input("Yes or No > ").strip().lower()
+            if answer == "yes":
+                break
+            if answer == "no":
+                print("Please try again")
+                continue
+            else:
+                print("Please enter Yes or No")
+                continue
+        except:
+            print("Standard No. must be an integer.")
+    # Check if the student already has the grade of that standard
+    cursor.execute("SELECT score FROM student_standard_grade WHERE student_id = ? AND standard_number = ?", (student_id, standard_number))
+    exist = cursor.fetchone()
+    if exist:
+        current_score = exist[0]
+        cursor.execute("SELECT name FROM grade WHERE score = ?", (current_score, ))
+        current_name = cursor.fetchone()[0]
+        print(f"\nWarning: {student[0]} {student[1]} already has a score of {current_score}, {current_name} for standard {standard_number}.")
+        while True:
+            # Ask user to replace or not
+            print("Do you want to replace it with a new score?")
+            answer = input("Yes or No > ").strip().lower()
+            if answer == 'yes':
+                while True:
+                    print('\nPlease enter the new score (0 to 8)')
+                    score = input("> ").strip()
+                    try:
+                        score = int(score)
+                        if 0 <= score <= 8:
+                            break
+                        else:
+                            print("Score must be between 0 and 8")
+                            continue
+                    except:
+                        print('Score must be an integer')
+                cursor.execute("UPDATE student_standard_grade SET score = ? WHERE student_id = ? ND standard_number = ?", (score, student_id, standard_number))
+                db.commit()
+            elif answer == 'no':
+                print("Operation cancelled by user")
+                return
+            else:
+                print("Please enter Yes or No")
+    else:
+        # Get the score from the user
+        while True:
+            print("\nPlease enter the score (0 to 8)")
+            score = input("> ").strip()
+            try:
+                score = int(score)
+                if score < 0 or score > 8:
+                    print("Score must between 0 to 8")
+                else:
+                    break
+            except:
+                print("Score must be an integer.")
+        cursor.execute("INSERT INTO student_standard_grade (student_id, standard_number, score) VALUES (?, ?, ?)", (student_id, standard_number, score))
+        db.commit()
+        # Automatically bring the name of the grade based on the score
+        cursor.execute("SELECT name FROM grade WHERE score = ?", (score,))
+        result = cursor.fetchone()
+        grade_name = result[0]
+        # Print the result
+        print(f"\nCompleted! {student[0]} {student[1]} got {score}, which means {grade_name} in {standard_number}, {title}")
+
+def remove_grade():
+    # Get the student ID from the user
+    while True:
+        print("\nPlease enter the ID of the student that you want to remove the grade. You see the the list of all students on the menu by choosing 2")
+        student_id = input("> ").strip()
+        try:
+            student_id = int(student_id)
+            break
+        except:
+            print("Student ID must be an integer.")
+    cursor.execute("SELECT first_name, last_name FROM student WHERE student_id = ?", (student_id,))
+    student = cursor.fetchone()
+    if not student:
+        print("Student not found.")
+        return
+    # Check if the user matches the person they are looking for.
+    while True:
+        print(f"\nAre you looking for {student[0]} {student[1]}?")
+        answer = input("Yes or No > ").strip().lower()
+        if answer == "yes":
+            break
+        elif answer == "no":
+            print("Please try again from the beginning")
+            print("You can see the list of all students from choosing 2 on the menu.")
+            return
+        else:
+            print("Please enter Yes or No")
+            continue
+    # Get the standard number from the user
+    while True:
+        print("\nPlease enter the number of the standard")
+        standard_number = input("> ").strip()
+        try:
+            standard_number = int(standard_number)
+            # Look for the NZQA standard in the database
+            cursor.execute("SELECT standard_type, level, domain, title, credits, assessment_type FROM standard WHERE standard_number = ?", (standard_number,))
+            standard = cursor.fetchone()
+            if not standard:
+                print("Standard not found.")
+                continue
+            st_type, level, domain, title, credits, assess_type = standard
+            # Check if the user matches the standard they are looking for
+            print(f"\nDo you mean {st_type} Standard - Level {level} {domain} - {title} - {credits} {assess_type} Credit(s)?")
+            answer = input("Yes or No > ").strip().lower()
+            if answer == "yes":
+                break
+            if answer == "no":
+                print("Please try again")
+                continue
+            else:
+                print("Please enter Yes or No")
+                continue
+        except:
+            print("Standard No. must be an integer.")
+    cursor.execute("SELECT score FROM student_standard_grade WHERE student_id = ? AND standard_number = ?", (student_id, standard_number, ))
+    exist = cursor.fetchone()
+    if not exist:
+        print(f"\n{student[0]} {student[1]} does not have any grade recorded for standard {standard_number} yet.")
+        print("Please try again after the student's grade is recorded")
+        return
+    else:
+        score = exist[0]
+        cursor.execute("SELECT name FROM grade WHERE score = ?", (score, ))
+        grade_name = cursor.fetchone()[0]
+        print(f"\nWe found the record that {student[0]} {student[1]} has {score}, which means {grade_name} for standard {standard_number}!")
+        while True:
+            print(f'\nAre you sure you want to remove {student[0]} {student[1]} grade for standard {standard_number}?')
+            print(f'If you remove the record, it cannot be canceled.')
+            answer = input("Yes or No > ").strip().lower()
+            if answer == "yes":
+                cursor.execute("DELETE FROM student_standard_grade WHERE student_id = ? AND standard_number = ?", (student_id, standard_number, ))
+                db.commit()
+                print("\nCompleted! The grade record of the student has been removed.")
+            elif answer == "no":
+                print("Operation cancelled by user")
+                return
+            else:
+                print("Please enter Yes or No")
+                continue
+
 # Menu Function
 def main():
     print("\nKia ora, welcome to Student Grade Tracker")
@@ -141,8 +329,8 @@ def main():
             break
         elif answer == "8":
             print("\nNeed Help?")
-            print("Please contact kangl@stu.otc.school.nz anytime you need help!")
-            print("We would be happy to help in 2 working days.")
+            print("Please contact kangl@stu.otc.school.nz anytime you need help")
+            print("We would be happy to help in 2 businesses days.")
         else:
             print("INVALID INPUT")
             continue
