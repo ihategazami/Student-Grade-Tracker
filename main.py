@@ -70,7 +70,7 @@ def unenrol_student():
             break
         elif answer == "no":
             print("Please try again from the beginning")
-            print("You can see the list of all students from choosing 2 on the menu.")
+            print("You can see the list of all students from choosing 3 on the menu.")
             return
         else:
             print("Please enter Yes or No")
@@ -106,7 +106,7 @@ def show_all_students():
 def record_grade():
     # Get the student ID from the user
     while True:
-        print("\nPlease enter the ID of the student that you want to enter the grade. You see the the list of all students on the menu by choosing 2")
+        print("\nPlease enter the ID of the student that you want to enter the grade.")
         student_id = input("> ").strip()
         try:
             student_id = int(student_id)
@@ -118,7 +118,7 @@ def record_grade():
     if not student:
         print("Student not found.")
         return
-    # Check if the user matches the person they are looking for.
+    # Check if the user matches the person they are looking for
     while True:
         print(f"\nAre you looking for {student[0]} {student[1]}?")
         answer = input("Yes or No > ").strip().lower()
@@ -126,7 +126,7 @@ def record_grade():
             break
         elif answer == "no":
             print("Please try again from the beginning")
-            print("You can see the list of all students from choosing 2 on the menu.")
+            print("You can see the list of all students from choosing 3 on the menu.")
             return
         else:
             print("Please enter Yes or No")
@@ -214,7 +214,7 @@ def record_grade():
 def remove_grade():
     # Get the student ID from the user
     while True:
-        print("\nPlease enter the ID of the student that you want to remove the grade. You see the the list of all students on the menu by choosing 2")
+        print("\nPlease enter the ID of the student that you want to remove the grade.")
         student_id = input("> ").strip()
         try:
             student_id = int(student_id)
@@ -234,7 +234,7 @@ def remove_grade():
             break
         elif answer == "no":
             print("Please try again from the beginning")
-            print("You can see the list of all students from choosing 2 on the menu.")
+            print("You can see the list of all students from choosing 3 on the menu.")
             return
         else:
             print("Please enter Yes or No")
@@ -291,6 +291,216 @@ def remove_grade():
                 print("Please enter Yes or No")
                 continue
 
+def standard_detail():
+    # Get the standard number from the user
+    while True:
+        print("\nPlease enter the number of the standard that you want to see the data")
+        standard_number = input("> ").strip()
+        try:
+            standard_number = int(standard_number)
+            # Look for the NZQA standard in the database
+            cursor.execute("SELECT standard_type, level, domain, title, credits, assessment_type FROM standard WHERE standard_number = ?", (standard_number,))
+            standard = cursor.fetchone()
+            if not standard:
+                print("Standard not found.")
+                continue
+            st_type, level, domain, title, credits, assess_type = standard
+            # Check if the user matches the standard they are looking for
+            print(f"\nDo you mean {st_type} Standard - Level {level} {domain} - {standard_number} {title} - {credits} {assess_type} Credit(s)?")
+            answer = input("Yes or No > ").strip().lower()
+            if answer == "yes":
+                break
+            if answer == "no":
+                print("Please try again")
+                continue
+            else:
+                print("Please enter Yes or No")
+                continue
+        except:
+            print("Standard No. must be an integer.")
+    # Ask user what data that user wants to get
+    while True:
+        print(f"\nWhat would you like to do for Standard: {standard_number} - {title}")
+        print("1. See all students who got Excellence")
+        print("2. See all students who got Merit")
+        print("3. See all students who got Achievement")
+        print("4. See all students who got Not Achieved")
+        print("5. See all students who did not submit the assessment")
+        print("6. Pass rate of this standard")
+        answer = input("> ").strip()
+        if answer in {"1", "2", "3", "4", "5", "6"}:
+            break
+        else:
+            print("INVALID INPUT, please enter the integer between 1 - 6")
+    # If user choose the data of the students' grade list
+    if answer in {"1", "2", "3", "4", "5"}:
+        # Define the low and high grade scale, and name of the grade
+        if answer == "1":
+            low, high, grad = 7, 8, "Excellence"
+        if answer == "2":
+            low, high, grad = 5, 6, "Merit"
+        if answer == "3":
+            low, high, grad = 3, 4, "Achievement"
+        if answer == "4":
+            low, high, grad = 1, 2, "Not Achieved"
+        if answer == "5":
+            low, high, grad = 0, 0, "Not Submitted"
+        # Find the students from the database
+        cursor.execute("""SELECT
+                       student_standard_grade.student_id, 
+                       student.first_name, 
+                       student.last_name, 
+                       student_standard_grade.score, 
+                       grade.name 
+                       FROM student_standard_grade 
+                       JOIN student 
+                       ON student.student_id = student_standard_grade.student_id 
+                       JOIN grade 
+                       ON grade.score = student_standard_grade.score 
+                       WHERE student_standard_grade.standard_number = ? 
+                       AND student_standard_grade.score 
+                       BETWEEN ? AND ?""", (standard_number, low, high))
+        rows = cursor.fetchall()
+        # Print the students from the database
+        if rows:
+            headers = ["ID", "First Name", "Last Name", "Score", "grade"]
+            print(f'\nstudents who got {grad} on Standard {standard_number}:')
+            print(tabulate(rows, headers=headers, tablefmt="fancy_grid"))
+        else:
+            print(f"\nNo students found with {grad} on Standard {standard_number}.")
+    # If use choose the pass rate data
+    if answer == "6":
+        cursor.execute("SELECT COUNT(*) FROM student_standard_grade WHERE standard_number = ?", (standard_number,))
+        total_attempted = cursor.fetchone()[0]
+        if total_attempted == 0:
+            print(f"\nNo one has attempted Standard {standard_number} yet.")
+        else:
+            cursor.execute("SELECT COUNT(*) FROM student_standard_grade WHERE standard_number = ? AND score >= 3", (standard_number, ))
+            total_passed = cursor.fetchone()[0]
+            pass_rate = round(total_passed / total_attempted * 100, 2)
+            print(f"\nPass rate for Standard {standard_number}: {pass_rate}%, ({total_passed}/{total_attempted})")
+
+def student_detail():
+    # Get the student ID from the user
+    while True:
+        print("\nPlease enter the ID of the student that you want to see the data")
+        student_id = input("> ").strip()
+        try:
+            student_id = int(student_id)
+            break
+        except:
+            print("Student ID must be an integer.")
+    cursor.execute("SELECT first_name, last_name FROM student WHERE student_id = ?", (student_id,))
+    student = cursor.fetchone()
+    if not student:
+        print("Student not found.")
+        return
+    # Check if the user matches the person they are looking for.
+    while True:
+        print(f"\nAre you looking for {student[0]} {student[1]}?")
+        answer = input("Yes or No > ").strip().lower()
+        if answer == "yes":
+            break
+        elif answer == "no":
+            print("Please try again from the beginning")
+            print("You can see the list of all students from choosing 3 on the menu.")
+            return
+        else:
+            print("Please enter Yes or No")
+            continue
+    while True:
+        print(f"\nWhat would you like to do for {student[0]} {student[1]}?")
+        print("1. View All Standards Results")
+        print("2. View All Achievement Standards Results")
+        print("3. View All Unit Standards results")
+        print("4. View Student's All Standards Pass Rate")
+        answer = input("> ").strip()
+        if answer in {"1", "2", "3", "4"}:
+            break
+        else:
+            print("INVALID INPUT, please enter the integer between 1 - 4")
+    if answer == "1":
+        cursor.execute("""SELECT
+                       student_standard_grade.standard_number,
+                       standard.standard_type,
+                       standard.level
+                       standard.domain
+                       standard.title
+                       student_standard_grade.score
+                       grade.name
+                       FROM student_standard_grade
+                       JOIN standard
+                       ON student_standard_grade.standard_number = standard.standard_number
+                       JOIN grade
+                       ON student_standard_grade.score = grade.score
+                       WHERE student_standard_grade.student_id = ?
+                       ORDER BY student_standard_grade.standard_number""", (student_id, ))
+        result = cursor.fetchall()
+        if result:
+            headers = ["Standard No.", "Type", "Level", "Domain", "Title", "Score", "Grade"]
+            print(tabulate(result, headers = headers, tablefmt = "fancy_grid"))
+        else:
+            print("No standards result found for this student.")
+            return
+    elif answer == "2":
+        cursor.execute("""SELECT
+                       student_standard_grade.standard_number,
+                       standard.standard_type,
+                       standard.level
+                       standard.domain
+                       standard.title
+                       student_standard_grade.score
+                       grade.name
+                       FROM student_standard_grade
+                       JOIN standard
+                       ON student_standard_grade.standard_number = standard.standard_number
+                       JOIN grade
+                       ON student_standard_grade.score = grade.score
+                       WHERE student_standard_grade.student_id = ?
+                       AND standard.standard_type = 'Achievement Standard'
+                       ORDER BY student_standard_grade.standard_number""", (student_id, ))
+        result = cursor.fetchall()
+        if result:
+            headers = ["Standard No.", "Type", "Level", "Domain", "Title", "Score", "Grade"]
+            print(tabulate(result, headers = headers, tablefmt = "fancy_grid"))
+        else:
+            print("No Achievement Standards result found for this student.")
+            return
+    elif answer == "3":
+        cursor.execute("""SELECT
+                       student_standard_grade.standard_number,
+                       standard.standard_type,
+                       standard.level
+                       standard.domain
+                       standard.title
+                       student_standard_grade.score
+                       grade.name
+                       FROM student_standard_grade
+                       JOIN standard
+                       ON student_standard_grade.standard_number = standard.standard_number
+                       JOIN grade
+                       ON student_standard_grade.score = grade.score
+                       WHERE student_standard_grade.student_id = ?
+                       AND standard.standard_type = 'Unit Standard'
+                       ORDER BY student_standard_grade.standard_number""", (student_id, ))
+        result = cursor.fetchall()
+        if result:
+            headers = ["Standard No.", "Type", "Level", "Domain", "Title", "Score", "Grade"]
+            print(tabulate(result, headers = headers, tablefmt = "fancy_grid"))
+        else:
+            print("No Unit Standards result found for this student.")
+            return
+    elif answer == "4":
+        cursor.execute("SELECT COUNT(*) FROM student_standard_grade WHERE student_id = ?", (student_id, ))
+        total_attempted = cursor.fetchone()[0]
+        if total_attempted == 0:
+            print("This student has not attempted any standards yet.")
+            return
+        cursor.execute("SELECT COUNT(*) FROM student_standard_grade WHERE student_id = ? AND score >= 3", (student_id, ))
+        total_passed = cursor.fetchone()[0]
+        pass_rate = round(total_passed / total_attempted * 100, 2)
+        print(f"\nPass rate of {student[0]} {student[1]}: {pass_rate}%, ({total_passed}/{total_attempted})")
+
 # Menu Function
 def main():
     print("\nKia ora, welcome to Student Grade Tracker")
@@ -321,13 +531,16 @@ def main():
             continue
         elif answer == "5":
             remove_grade()
+            continue
         elif answer == "6":
             standard_detail()
+            continue
         elif answer == "7":
             student_detail()
+            continue
         elif answer == "8":
             break
-        elif answer == "8":
+        elif answer == "9":
             print("\nNeed Help?")
             print("Please contact kangl@stu.otc.school.nz anytime you need help")
             print("We would be happy to help in 2 businesses days.")
