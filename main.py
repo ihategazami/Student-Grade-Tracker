@@ -182,8 +182,15 @@ def record_grade():
                             continue
                     except:
                         print('Score must be an integer')
-                cursor.execute("UPDATE student_standard_grade SET score = ? WHERE student_id = ? ND standard_number = ?", (score, student_id, standard_number))
+                cursor.execute("UPDATE student_standard_grade SET score = ? WHERE student_id = ? AND standard_number = ?", (score, student_id, standard_number))
                 db.commit()
+                # Automatically bring the name of the grade based on the score
+                cursor.execute("SELECT name FROM grade WHERE score = ?", (score,))
+                result = cursor.fetchone()
+                grade_name = result[0]
+                # Print the result
+                print(f"\nCompleted! {student[0]} {student[1]}'s {standard_number}, {title} result is replaced to {score}, which means {grade_name}!")
+                return
             elif answer == 'no':
                 print("Operation cancelled by user")
                 return
@@ -284,6 +291,7 @@ def remove_grade():
                 cursor.execute("DELETE FROM student_standard_grade WHERE student_id = ? AND standard_number = ?", (student_id, standard_number, ))
                 db.commit()
                 print("\nCompleted! The grade record of the student has been removed.")
+                return
             elif answer == "no":
                 print("Operation cancelled by user")
                 return
@@ -423,10 +431,10 @@ def student_detail():
         cursor.execute("""SELECT
                        student_standard_grade.standard_number,
                        standard.standard_type,
-                       standard.level
-                       standard.domain
-                       standard.title
-                       student_standard_grade.score
+                       standard.level,
+                       standard.domain,
+                       standard.title,
+                       student_standard_grade.score,
                        grade.name
                        FROM student_standard_grade
                        JOIN standard
@@ -446,10 +454,10 @@ def student_detail():
         cursor.execute("""SELECT
                        student_standard_grade.standard_number,
                        standard.standard_type,
-                       standard.level
-                       standard.domain
-                       standard.title
-                       student_standard_grade.score
+                       standard.level,
+                       standard.domain,
+                       standard.title,
+                       student_standard_grade.score,
                        grade.name
                        FROM student_standard_grade
                        JOIN standard
@@ -457,7 +465,7 @@ def student_detail():
                        JOIN grade
                        ON student_standard_grade.score = grade.score
                        WHERE student_standard_grade.student_id = ?
-                       AND standard.standard_type = 'Achievement Standard'
+                       AND standard.standard_type = 'Achievement'
                        ORDER BY student_standard_grade.standard_number""", (student_id, ))
         result = cursor.fetchall()
         if result:
@@ -470,10 +478,10 @@ def student_detail():
         cursor.execute("""SELECT
                        student_standard_grade.standard_number,
                        standard.standard_type,
-                       standard.level
-                       standard.domain
-                       standard.title
-                       student_standard_grade.score
+                       standard.level,
+                       standard.domain,
+                       standard.title,
+                       student_standard_grade.score,
                        grade.name
                        FROM student_standard_grade
                        JOIN standard
@@ -481,7 +489,7 @@ def student_detail():
                        JOIN grade
                        ON student_standard_grade.score = grade.score
                        WHERE student_standard_grade.student_id = ?
-                       AND standard.standard_type = 'Unit Standard'
+                       AND standard.standard_type = 'Unit'
                        ORDER BY student_standard_grade.standard_number""", (student_id, ))
         result = cursor.fetchall()
         if result:
