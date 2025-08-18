@@ -59,7 +59,7 @@ def enrol_student():
 def unenrol_student():
     # Get the student ID from the user
     while True:
-        print("\nPlease enter the ID of the student that you want to enrol")
+        print("\nPlease enter the ID of the student that you want to unenrol")
         student_id = input("> ").strip()
         try:
             student_id = int(student_id)
@@ -397,7 +397,7 @@ def standard_detail():
             print(tabulate(rows, headers=headers, tablefmt="fancy_grid"))
         else:
             clearScreen()
-            print(f"\nNo students found with {grad} on Standard {standard_number}.")
+            print(f"\nNo students attempted Standard {standard_number}.")
     if answer in {"2", "3", "4", "5", "6"}:
         # Define the low and high grade scale, and name of the grade
         if answer == "2":
@@ -588,6 +588,7 @@ def student_detail():
         cursor.execute("SELECT COUNT(*) FROM student_standard_grade WHERE student_id = ?", (student_id, ))
         total_attempted = cursor.fetchone()[0]
         if total_attempted == 0:
+            clearScreen()
             print("This student has not attempted any standards yet.")
             return
         # Total achieved standard count
@@ -613,6 +614,10 @@ def student_detail():
             WHERE student_standard_grade.student_id = ?
             AND student_standard_grade.score >= 3""", (student_id,))
         tot_gained_credits = cursor.fetchone()[0]
+        if tot_attempt_credits == None:
+            tot_attempt_credits = "0"
+        if tot_gained_credits == None:
+            tot_gained_credits = "0"
         clearScreen()
         print(f"Total attempted credits of {student[0]} {student[1]}: {tot_attempt_credits} Credits")
         print(f"Total gained credits of {student[0]} {student[1]}: {tot_gained_credits} Credits")
@@ -646,7 +651,7 @@ def main():
     clearScreen()
     print("\nHello, Welcome to Student Grade Tracker")
     while True:
-        print("What would you like to do?")
+        print("\nWhat would you like to do?")
         print("")
         print("1. Enrol a new student")
         print("2. Unenrol an existing student")
