@@ -8,9 +8,9 @@ cursor = db.cursor()
 
 # Function to clean the terminal
 def clearScreen():
-    if os.name == 'nt': # If the operating system is Window
+    if os.name == 'nt': # If the operating system is Windows
         os.system('CLS')
-    else: # If the operating system is NOT Window
+    else: # If the operating system is NOT Windows
         os.system('clear')
 
 # Function to ENROL student
@@ -22,7 +22,7 @@ def enrol_student():
         if not first_name:
             print("You have to enter the first name.")
         elif any(char.isdigit() for char in first_name):
-            print("You may not include any integer in the first name.")
+            print("You may not include any digits in the first name.")
         else:
             break
     # Get Last Name from the user 
@@ -32,7 +32,7 @@ def enrol_student():
         if not last_name:
             print("You have to enter the last name.")
         elif any(char.isdigit() for char in last_name):
-            print("You may not include any integer in the last name.")
+            print("You may not include any digits in the last name.")
         else:
             break
     # Upload it to the database
@@ -45,7 +45,7 @@ def enrol_student():
             db.commit()
             student_id = cursor.lastrowid
             clearScreen()
-            print(f"\nCompleted! We enrol {first_name} {last_name} to our tracker. The ID of the {first_name} {last_name} is {student_id}.")
+            print(f"\nCompleted! Enrolled {first_name} {last_name} in the tracker. The ID of the {first_name} {last_name} is {student_id}.")
             return
         elif answer == 'no':
             clearScreen()
@@ -59,7 +59,7 @@ def enrol_student():
 def unenrol_student():
     # Get the student ID from the user
     while True:
-        print("\nPlease enter the ID of the student that you want to unenrol")
+        print("\nPlease enter the ID of the student you want to unenrol")
         student_id = input("> ").strip()
         try:
             student_id = int(student_id)
@@ -80,7 +80,7 @@ def unenrol_student():
         if answer == "yes":
             break
         elif answer == "no":
-            print("Please try again from the beginning")
+            print("Please try again.")
             print("You can see the list of all students from choosing 3 on the menu.")
             return
         else:
@@ -89,7 +89,7 @@ def unenrol_student():
     # Give a chance to a user to cancel the operation
     while True:
         print(f'\nAre you sure you want to remove {student[0]} {student[1]} (ID={student_id})?')
-        print(f'If you unenrol the student, all informations would be deleted from the database and it cannot be canceled.')
+        print(f'If you unenrol the student, all information will be deleted from the database and it cannot be cancelled.')
         answer = input("Yes or No > ").strip().lower()
         if answer == 'yes':
             # Remove all recorded grade first (Foreign Key Issue)
@@ -146,7 +146,7 @@ def record_grade():
             break
         elif answer == "no":
             clearScreen()
-            print("Please try again from the beginning")
+            print("Please try again.")
             print("You can see the list of all students from choosing 3 on the menu.")
             return
         else:
@@ -177,7 +177,7 @@ def record_grade():
                 print("Please enter Yes or No")
                 continue
         except:
-            print("Standard No. must be an integer.")
+            print("Standard number must be an integer.")
     # Check if the student already has the grade of that standard
     cursor.execute("SELECT score FROM student_standard_grade WHERE student_id = ? AND standard_number = ?", (student_id, standard_number))
     exist = cursor.fetchone()
@@ -200,10 +200,10 @@ def record_grade():
                         if 0 <= score <= 8:
                             break
                         else:
-                            print("Score must be between 0 and 8")
+                            print("Score must be between 0 to 8.")
                             continue
                     except:
-                        print('Score must be an integer')
+                        print('Score must be an integer.')
                 cursor.execute("UPDATE student_standard_grade SET score = ? WHERE student_id = ? AND standard_number = ?", (score, student_id, standard_number))
                 db.commit()
                 # Automatically bring the name of the grade based on the score
@@ -228,7 +228,7 @@ def record_grade():
             try:
                 score = int(score)
                 if score < 0 or score > 8:
-                    print("Score must between 0 to 8")
+                    print("Score must be between 0 to 8.")
                 else:
                     break
             except:
@@ -266,7 +266,7 @@ def remove_grade():
         if answer == "yes":
             break
         elif answer == "no":
-            print("Please try again from the beginning")
+            print("Please try again.")
             print("You can see the list of all students from choosing 3 on the menu.")
             return
         else:
@@ -297,7 +297,7 @@ def remove_grade():
                 print("Please enter Yes or No")
                 continue
         except:
-            print("Standard No. must be an integer.")
+            print("Standard number must be an integer.")
     # See the result exist or not
     cursor.execute("SELECT score FROM student_standard_grade WHERE student_id = ? AND standard_number = ?", (student_id, standard_number, ))
     exist = cursor.fetchone()
@@ -357,23 +357,23 @@ def standard_detail():
                 print("Please enter Yes or No")
                 continue
         except:
-            print("Standard No. must be an integer.")
+            print("Standard number must be an integer.")
     # Ask user what data that user wants to get
     while True:
-        print(f"\nWhat would you like to do for Standard: {standard_number} - {title}")
-        print("1. See all student who attempt this standard")
+        print(f"\nWhat would you like to do for Standard {standard_number} - {title}")
+        print("1. See all student who attempted this standard")
         print("2. See all students who got Excellence")
         print("3. See all students who got Merit")
         print("4. See all students who got Achievement")
         print("5. See all students who got Not Achieved")
         print("6. See all students who did not submit the assessment")
-        print("7. Pass rate of this standard")
+        print("7. Pass rate for this standard")
         print("8. Exit")
         answer = input("> ").strip()
         if answer in {"1", "2", "3", "4", "5", "6", "7", "8"}:
             break
         else:
-            print("INVALID INPUT, please enter the integer between 1 - 8")
+            print("INVALID INPUT, please enter the integer between 1 and 8.")
     # If user choose the data of the students' grade list
     if answer == "1":
         cursor.execute("""SELECT
@@ -392,12 +392,12 @@ def standard_detail():
         # Print the students from the database
         if rows:
             clearScreen()
-            headers = ["ID", "First Name", "Last Name", "Score", "grade"]
+            headers = ["ID", "First Name", "Last Name", "Score", "Grade"]
             print(f'\nStudents who attempted Standard {standard_number}:')
             print(tabulate(rows, headers=headers, tablefmt="fancy_grid"))
         else:
             clearScreen()
-            print(f"\nNo students attempted Standard {standard_number}.")
+            print(f"\nNo students attempted Standard {standard_number} yet.")
     if answer in {"2", "3", "4", "5", "6"}:
         # Define the low and high grade scale, and name of the grade
         if answer == "2":
@@ -429,7 +429,7 @@ def standard_detail():
         # Print the students from the database
         if rows:
             clearScreen()
-            headers = ["ID", "First Name", "Last Name", "Score", "grade"]
+            headers = ["ID", "First Name", "Last Name", "Score", "Grade"]
             print(f'\nStudents who got {grad} on Standard {standard_number}:')
             print(tabulate(rows, headers=headers, tablefmt="fancy_grid"))
         else:
@@ -477,7 +477,7 @@ def student_detail():
             break
         elif answer == "no":
             clearScreen()
-            print("Please try again from the beginning")
+            print("Please try again.")
             print("You can see the list of all students from choosing 3 on the menu.")
             return
         else:
@@ -486,11 +486,11 @@ def student_detail():
     while True:
         # Option
         print(f"\nWhat would you like to do for {student[0]} {student[1]}?")
-        print("1. View All Standards Results")
-        print("2. View All Achievement Standards Results")
-        print("3. View All Unit Standards results")
-        print("4. View Student's All Standards Pass Rate")
-        print("5. Total gained credits of student")
+        print("1. View all Standards results")
+        print("2. View all Achievement Standards results")
+        print("3. View all Unit Standards results")
+        print("4. Student's Pass Rate")
+        print("5. Total gained credits")
         print("6. Exit")
         answer = input("> ").strip()
         if answer in {"1", "2", "3", "4", "5", "6"}:
@@ -597,7 +597,7 @@ def student_detail():
         # Pass rate calculation
         pass_rate = round(total_passed / total_attempted * 100, 2)
         clearScreen()
-        print(f"\nPass rate of {student[0]} {student[1]}: {pass_rate}%, ({total_passed}/{total_attempted})")
+        print(f"\nPass rate for {student[0]} {student[1]}: {pass_rate}%, ({total_passed}/{total_attempted})")
     elif answer == "5":
         cursor.execute("""
             SELECT SUM(standard.credits)
@@ -628,21 +628,21 @@ def student_detail():
 
 def help():
     clearScreen()
-    print("\nExplaination of Each Function")
+    print("\nExplanation of Each Function")
     print("1. Enrol a new student")
-    print("You can enrol a new student by using this function")
+    print("You can enrol a new student by using this function.")
     print("\n2. Unenrol an existing student")
-    print("You can unenrol an existing student from the database by using this function")
+    print("You can unenrol an existing student from the database by using this function.")
     print("\n3. Show all students")
-    print("You can see all students who are enrolled in database")
+    print("You can see all students who are enrolled in the database.")
     print("\n4. Record student's grade")
-    print("You can record the grade of student in specific standard")
+    print("You can record a student's grade for a specific standard.")
     print("\n5. Remove the recorded grade")
-    print("You can remove the recorded grade of student in specific standard")
+    print("You can remove a student's recorded grade for a specific standard.")
     print("\n6. Standard Analysis")
-    print("You can see the analysis, sorted results of specific standard")
+    print("You can see the analysis and sorted results for a specific standard.")
     print("\n7. Student Analysis")
-    print("You can see the analysis, sorted results of specific student")
+    print("You can see the analysis and sorted results for a specific student.")
     print("\nFor any further help, please contact kangl@stu.otc.school.nz")
     print("")
 
@@ -655,9 +655,9 @@ def main():
         print("")
         print("1. Enrol a new student")
         print("2. Unenrol an existing student")
-        print("3. Show all Students")
+        print("3. Show all students")
         print("")
-        print("4. Record student's Grade")
+        print("4. Record student's grade")
         print("5. Remove the recorded grade")
         print("")
         print("6. Standard Analysis")
