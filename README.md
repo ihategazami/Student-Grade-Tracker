@@ -17,16 +17,16 @@ Digital Technologies 1.2 - AS92005 - Develop a digital technologies outcome - 20
 
 ## Installation
 Student Grade Tracker requires Python and Tabulate. Python 3.9.6 is recommended.
-- How to install tabulate:
-For standard Python:
+To install tabulate:
+- For standard Python:
 ```sh
 pip install tabulate
 ```
-For multiple Python versions:
+- For multiple Python versions:
 ```sh
 python3 -m pip install tabulate
 ```
-For Anaconda:
+- For Anaconda:
 ```sh
 conda install -c conda-forge tabulate
 ```
