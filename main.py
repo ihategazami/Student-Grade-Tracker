@@ -1,3 +1,6 @@
+'''This program help teachers to record and analyse student's grade, and help students to manage their own grade'''
+'''L1DTSD 92005 Lucas Kang kangl@stu.otc.school.nz'''
+
 import sqlite3
 from tabulate import tabulate
 import os
@@ -318,6 +321,7 @@ def remove_grade():
             print(f'If you remove the record, it cannot be canceled.')
             answer = input("Yes or No > ").strip().lower()
             if answer == "yes":
+                # Delete query
                 cursor.execute("DELETE FROM student_standard_grade WHERE student_id = ? AND standard_number = ?", (student_id, standard_number, ))
                 db.commit()
                 clearScreen()
@@ -445,6 +449,7 @@ def standard_detail():
         else:
             cursor.execute("SELECT COUNT(*) FROM student_standard_grade WHERE standard_number = ? AND score >= 3", (standard_number, ))
             total_passed = cursor.fetchone()[0]
+            # Calculate the pass rate
             pass_rate = round(total_passed / total_attempted * 100, 2)
             clearScreen()
             print(f"\nPass rate for Standard {standard_number}: {pass_rate}%, ({total_passed}/{total_attempted})")
@@ -626,7 +631,7 @@ def student_detail():
         print("Operation cancelled by user")
         return
 
-def help():
+def support():
     clearScreen()
     print("\nExplanation of Each Function")
     print("1. Enrol a new student")
@@ -691,7 +696,7 @@ def main():
         elif answer == "8":
             break
         elif answer == "9":
-            help()
+            support()
         else:
             clearScreen()
             print("INVALID INPUT")
