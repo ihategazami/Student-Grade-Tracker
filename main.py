@@ -318,7 +318,7 @@ def remove_grade():
         while True:
             # Ask user again to remove the result or not
             print(f'\nAre you sure you want to remove {student[0]} {student[1]} grade for standard {standard_number}?')
-            print(f'If you remove the record, it cannot be canceled.')
+            print(f'If you remove the record, it cannot be cancelled.')
             answer = input("Yes or No > ").strip().lower()
             if answer == "yes":
                 # Delete query
