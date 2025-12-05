@@ -1,6 +1,10 @@
 # Student Grade Tracker
 Digital Technologies 1.2 - AS92005 - Develop a digital technologies outcome - 2025
 
+## Result
+Result: Excellence (E8)
+7th October
+
 ## Features
 - Enrol and Unenrol students
 - Record and Remove(cancel) each student's grade of specific NZQA standards
